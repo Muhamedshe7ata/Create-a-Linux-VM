@@ -1,0 +1,86 @@
+Let's try the commands you would use to create a VM.
+Because we're using the Azure sandbox, you won't have to create a resource group. Instead, use the resource group learn-d746b41c-66fe-4478-bf61-cc49d561d8e6. In addition, be aware of the location restrictions.
+
+Let's create a new Azure VM with PowerShell.
+
+Use the New-AzVm cmdlet to create a VM.
+
+Use the resource group learn-d746b41c-66fe-4478-bf61-cc49d561d8e6.
+
+Give the VM a name. Typically, you want to use something meaningful that identifies the purposes of the VM, location, and (if there's more than one) instance number. We'll use "testvm-eus-01" for "Test VM in East US, instance 1". Come up with your own name based on where you'll place the VM.
+
+Select a location close to you from the following list, available in the Azure sandbox. Make sure to change the value in the following example command if you're using copy and paste.
+
+westus2
+southcentralus
+centralus
+eastus
+westeurope
+southeastasia
+japaneast
+brazilsouth
+australiasoutheast
+centralindia
+Use "Canonical:0001-com-ubuntu-server-focal:20_04-lts:latest" for the image. This image is Ubuntu Linux.
+
+Use the Get-Credential cmdlet and feed the results into the Credential parameter.
+
+
+## ## See the Linux VM FAQ for username and password limitations. Passwords must be 12 - 123 characters in length, and meet three of the following four complexity requirements:
+Have lowercase characters
+Have uppercase characters
+Have a digit
+Have a special character (Regex match [\W_])
+Add the -OpenPorts parameter and pass "22" as the port. This port will let us SSH into the machine.
+
+Create a public IP address name. You'll use this name to create and find your static IP address to sign in to the machine.
+
+write cod blew:
+
+New-AzVm -ResourceGroupName learn-d746b41c-66fe-4478-bf61-cc49d561d8e6 -Name "testvm-eus-01" -Credential (Get-Credential) -Location "eastus" -Image Canonical:0001-com-ubuntu-server-focal:20_04-lts:latest -OpenPorts 22 -PublicIpAddressName "testvm-01"
+
+Create a username and password, then press Enter. PowerShell will start creating your VM.
+
+The VM creation takes a few minutes to complete. After completion, you can query it and assign the VM object to a variable ($vm).
+write cod blew:
+
+$vm = (Get-AzVM -Name "testvm-eus-01" -ResourceGroupName learn-d746b41c-66fe-4478-bf61-cc49d561d8e6)
+
+Query the value to dump out the information about the VM.
+$vm
+
+You should see something like the following output:
+
+ResourceGroupName : learn-d746b41c-66fe-4478-bf61-cc49d561d8e6
+Id                : /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/learn-d746b41c-66fe-4478-bf61-cc49d561d8e6/providers/Microsoft.Compute/virtualMachines/testvm-eus-01
+VmId              : 00000000-0000-0000-0000-000000000000
+Name              : testvm-eus-01
+Type              : Microsoft.Compute/virtualMachines
+Location          : eastus
+Tags              : {}
+HardwareProfile   : {VmSize}
+NetworkProfile    : {NetworkInterfaces}
+OSProfile         : {ComputerName, AdminUsername, LinuxConfiguration, Secrets}
+ProvisioningState : Succeeded
+StorageProfile    : {ImageReference, OsDisk, DataDisks}
+
+
+You can reach into complex objects through a dot (".") notation. For example, to see the properties in the VMSize object associated with the HardwareProfile section, run the following command:
+
+
+$vm.HardwareProfile
+
+- You can even pass the VM object into other cmdlets. For example, running the following command will show you all available sizes for your VM:
+$vm | Get-AzVMSize
+
+Now, run the following command to get your public IP address:
+
+Get-AzPublicIpAddress -ResourceGroupName learn-d746b41c-66fe-4478-bf61-cc49d561d8e6 -Name "testvm-01"
+
+With the IP address, you can connect to the VM with SSH. For example, if you used the username "bob", and the IP address is "205.22.16.5", running this command would connect to the Linux machine:
+
+ssh bob@205.22.16.5
+
+Sign out by entering exit.
+
+
