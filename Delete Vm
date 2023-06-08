@@ -1,0 +1,37 @@
+## Delete a VM
+To try out some more commands, let's delete the VM. We'll shut it down first:
+
+
+Stop-AzVM -Name $vm.Name -ResourceGroupName $vm.ResourceGroupName
+Now, let's delete the VM by running the Remove-AzVM cmdlet:
+
+Remove-AzVM -Name $vm.Name -ResourceGroupName $vm.ResourceGroupName
+Run this command to list all the resources in your resource group:
+
+Get-AzResource -ResourceGroupName $vm.ResourceGroupName | Format-Table
+You should see a bunch of resources (disks, virtual networks, and so on) that all still exist.
+
+Microsoft.Compute/disks
+Microsoft.Network/networkInterfaces
+Microsoft.Network/networkSecurityGroups
+Microsoft.Network/publicIPAddresses
+Microsoft.Network/virtualNetworks
+The Remove-AzVM command just deletes the VM. It doesn't clean up any of the other resources. At this point, we'd likely just delete the resource group itself and be done with it. However, let's run through the exercise to clean it up manually. You should see a pattern in the commands.
+
+Delete the network interface:
+
+$vm | Remove-AzNetworkInterface –Force
+Delete the managed OS disks:
+
+Get-AzDisk -ResourceGroupName $vm.ResourceGroupName -DiskName $vm.StorageProfile.OSDisk.Name | Remove-AzDisk -Force
+Next, delete the virtual network:
+
+Get-AzVirtualNetwork -ResourceGroupName $vm.ResourceGroupName | Remove-AzVirtualNetwork -Force
+Delete the network security group:
+
+Get-AzNetworkSecurityGroup -ResourceGroupName $vm.ResourceGroupName | Remove-AzNetworkSecurityGroup -Force
+And finally, delete the public IP address:
+
+
+Get-AzPublicIpAddress -ResourceGroupName $vm.ResourceGroupName | Remove-AzPublicIpAddress -Force
+We should have caught all the created resources. Check the resource group just to be sure. We performed many manual commands here, but a better approach would have been to write a script. Then we could reuse this logic later to create or delete a VM. Let's look at scripting with PowerShell.
